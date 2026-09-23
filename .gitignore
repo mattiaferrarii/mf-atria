@@ -1,0 +1,21 @@
+# Commercial / negotiating document. Must never enter the repo:
+# accordo §7 contemplates depositing the source in escrow, releasable to Davide,
+# and this file contains tax structuring and negotiating positions.
+# Kept on disk at the path CLAUDE.md references, but never committed.
+docs/accordo-commerciale.md
+
+# Splat masters and delivery artifacts live in R2, not git.
+# Cloudflare Pages caps individual files at 25 MiB anyway.
+*.ply
+*.ksplat
+*.spz
+*.splat
+*.sog
+
+node_modules/
+dist/
+.env
+.DS_Store
+
+# wrangler local state/cache
+.wrangler/

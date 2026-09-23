@@ -1,0 +1,356 @@
+<title>Scheda Campo Ca' di Bazzone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground:  #EDF0EC;
+    --surface: #FFFFFF;
+    --sunk:    #E3E8E2;
+    --line:    #CFD7CD;
+    --line-2:  #B4BFB2;
+    --ink:     #171B17;
+    --muted:   #5E6A5D;
+    --accent:  #0F766E;
+    --accent-ink: #FFFFFF;
+    --warn:    #9A5B06;
+    --warn-bg: #FBF0DC;
+    --ok:      #15803D;
+    --shadow:  0 1px 2px rgba(23,27,23,.06), 0 4px 14px rgba(23,27,23,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:  #12161A;
+      --surface: #1A2026;
+      --sunk:    #232B32;
+      --line:    #2E3841;
+      --line-2:  #43505B;
+      --ink:     #E4EAE6;
+      --muted:   #94A39A;
+      --accent:  #2DD4BF;
+      --accent-ink: #06231F;
+      --warn:    #F0B429;
+      --warn-bg: #33280F;
+      --ok:      #4ADE80;
+      --shadow:  0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:  #12161A;
+    --surface: #1A2026;
+    --sunk:    #232B32;
+    --line:    #2E3841;
+    --line-2:  #43505B;
+    --ink:     #E4EAE6;
+    --muted:   #94A39A;
+    --accent:  #2DD4BF;
+    --accent-ink: #06231F;
+    --warn:    #F0B429;
+    --warn-bg: #33280F;
+    --ok:      #4ADE80;
+    --shadow:  0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 16px; line-height: 1.55;
+    margin: 0; padding: 0 16px 140px;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  h1, h2, h3, .lbl { font-family: "IBM Plex Sans Condensed", "IBM Plex Sans", sans-serif; }
+  h1 { font-size: clamp(28px, 7vw, 40px); font-weight: 700; letter-spacing: -.015em;
+       margin: 0; text-wrap: balance; line-height: 1.1; }
+  h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+       color: var(--accent); margin: 0 0 4px; }
+  .lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .09em;
+         color: var(--muted); }
+  p { margin: 0; }
+  code, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  header { padding: 32px 0 20px; border-bottom: 2px solid var(--line-2); }
+  .sub { color: var(--muted); margin-top: 8px; font-size: 15px; }
+  .rule { display: flex; gap: 10px; align-items: baseline; margin-top: 14px;
+          font-size: 12px; color: var(--muted); }
+
+  section { margin-top: 30px; }
+  .card { background: var(--surface); border: 1px solid var(--line);
+          border-radius: 3px; box-shadow: var(--shadow); }
+
+  /* ---- intake ---- */
+  .intake { padding: 16px; display: grid; gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  input, select, textarea {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 15px;
+    background: var(--sunk); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 2px;
+    padding: 9px 10px; width: 100%; font-variant-numeric: tabular-nums;
+  }
+  input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
+  /* ---- steps ---- */
+  ol.runs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+  .run { display: grid; grid-template-columns: 44px 1fr; }
+  .idx { background: var(--sunk); border-right: 1px solid var(--line);
+         display: flex; align-items: flex-start; justify-content: center; padding-top: 15px;
+         font-family: "IBM Plex Mono", monospace; font-size: 15px; font-weight: 600;
+         color: var(--muted); border-radius: 3px 0 0 3px; }
+  .run.warn .idx { background: var(--warn-bg); color: var(--warn); }
+  .body { padding: 14px 15px 15px; min-width: 0; }
+  .spec { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 4px; }
+  .chip { font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 500;
+          padding: 2px 7px; border-radius: 2px; background: var(--sunk);
+          border: 1px solid var(--line); color: var(--ink); }
+  .chip.hi { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .chip.wa { background: var(--warn-bg); color: var(--warn); border-color: var(--warn); }
+  .why { font-size: 14px; color: var(--muted); margin: 2px 0 12px; }
+
+  a.go { display: block; text-align: center; text-decoration: none;
+         background: var(--accent); color: var(--accent-ink);
+         font-family: "IBM Plex Sans Condensed", sans-serif; font-weight: 600;
+         font-size: 16px; letter-spacing: .04em; text-transform: uppercase;
+         padding: 13px; border-radius: 2px; margin-bottom: 14px; }
+  a.go:active { opacity: .8; }
+
+  .grid { display: grid; gap: 9px; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); }
+  .done { display: flex; align-items: center; gap: 8px; margin-top: 12px;
+          font-size: 14px; color: var(--muted); cursor: pointer; }
+  .done input { width: 18px; height: 18px; accent-color: var(--accent); padding: 0; }
+
+  /* ---- steps list ---- */
+  .how { padding: 15px 17px; }
+  .how ol { margin: 8px 0 0; padding-left: 20px; }
+  .how li { margin-bottom: 7px; font-size: 15px; }
+  .how li:last-child { margin-bottom: 0; }
+  .how b { color: var(--accent); }
+
+  .note { border-left: 3px solid var(--warn); background: var(--warn-bg);
+          padding: 12px 14px; border-radius: 0 2px 2px 0; font-size: 14.5px; color: var(--ink); }
+  .note .lbl { color: var(--warn); display: block; margin-bottom: 3px; }
+
+  /* ---- export ---- */
+  #out { width: 100%; min-height: 190px; margin-top: 12px; font-size: 13px; line-height: 1.5; white-space: pre; }
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+         background: var(--surface); border-top: 1px solid var(--line-2);
+         padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+         box-shadow: 0 -4px 18px rgba(0,0,0,.08); }
+  .bar .inner { max-width: 720px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
+  .prog { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .prog b { color: var(--ink); font-family: "IBM Plex Mono", monospace; }
+  button.act { flex: 1; background: var(--accent); color: var(--accent-ink); border: 0;
+    font-family: "IBM Plex Sans Condensed", sans-serif; font-weight: 600; font-size: 15px;
+    text-transform: uppercase; letter-spacing: .04em; padding: 12px; border-radius: 2px; cursor: pointer; }
+  footer { margin-top: 28px; font-size: 13px; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+<header>
+  <h2>Rilievo 3DGS · prova prestazioni</h2>
+  <h1>Scheda Campo Ca' di Bazzone</h1>
+  <p class="sub">Otto prove sul tuo telefono Android per capire se il tour 3D gira abbastanza
+     fluido da poterlo vendere. Compila i campi mano a mano: i dati restano salvati anche se
+     chiudi la pagina.</p>
+  <div class="rule mono"><span>OPERATORE: Davide</span><span>·</span><span id="today"></span></div>
+</header>
+
+<section>
+  <h2>Prima di iniziare</h2>
+  <div class="card how">
+    <ol>
+      <li>Usa la <b>connessione dati (4G/5G)</b>, non il wi-fi. Serve a misurare il tempo di
+          scaricamento reale — tranne la prova 8, che è <b>solo wi-fi</b>.</li>
+      <li>Apri ogni prova col pulsante verde. Si apre in una scheda nuova: questa resta aperta.</li>
+      <li>Aspetta che <code>splats built</code> arrivi a <b>100%</b>. Prima di allora i numeri non valgono.</li>
+      <li>Poi <b>ruota lentamente la scena col dito per circa un minuto</b>, come farebbe un cliente.</li>
+      <li>Tocca il riquadro nero in alto per aprire/chiudere i numeri, e ricopiali qui.</li>
+      <li><b>Lascia raffreddare il telefono</b> un paio di minuti tra una prova e l'altra: se si
+          scalda rallenta da solo e le ultime prove risultano peggiori senza motivo.</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <h2>Telefono e collegamento</h2>
+  <div class="card intake">
+    <label class="field"><span class="lbl">Modello telefono</span><input id="m_dev" placeholder="es. Pixel 7a"></label>
+    <label class="field"><span class="lbl">Versione Android</span><input id="m_os" placeholder="es. 14"></label>
+    <label class="field"><span class="lbl">Operatore / rete</span><input id="m_net" placeholder="es. TIM 4G"></label>
+    <label class="field"><span class="lbl">Tacche di segnale</span><input id="m_sig" placeholder="es. 3 su 4"></label>
+  </div>
+</section>
+
+<section>
+  <h2>Fase 1 · quanto pesa la risoluzione</h2>
+  <p class="why">Stessa qualità di modello in tutte e quattro. Cambia solo quanti pixel disegna
+     il telefono. Serve a capire se il problema è la risoluzione dello schermo.</p>
+  <ol class="runs" id="phase1"></ol>
+</section>
+
+<section>
+  <h2>Fase 2 · quanto dettaglio regge</h2>
+  <p class="why">Risoluzione bassa fissa, cambia il dettaglio del modello. Serve a capire quanto
+     possiamo alzare la qualità restando fluidi.</p>
+  <ol class="runs" id="phase2"></ol>
+</section>
+
+<section>
+  <h2>Fase 3 · riferimento di qualità</h2>
+  <div class="note" style="margin-bottom:14px">
+    <span class="lbl">Attenzione · solo wi-fi</span>
+    Questa prova scarica <b>214 MB</b>. Falla solo sotto wi-fi, mai con i dati del telefono.
+    Può anche bloccarsi o non aprirsi: va bene lo stesso, scrivilo nelle note.
+  </div>
+  <ol class="runs" id="phase3"></ol>
+</section>
+
+<section>
+  <h2>Note libere</h2>
+  <div class="card" style="padding:14px">
+    <textarea id="m_notes" rows="4" placeholder="Qualsiasi cosa strana: schermo nero, telefono bollente, immagine sfocata, blocchi…"></textarea>
+  </div>
+</section>
+
+<section>
+  <h2>Invia i risultati</h2>
+  <div class="card" style="padding:14px">
+    <p style="font-size:14.5px;color:var(--muted);margin-bottom:2px">
+      Premi il pulsante in basso, poi copia tutto il testo qui sotto e mandalo a Mattia.</p>
+    <textarea id="out" class="mono" readonly placeholder="Il riepilogo comparirà qui."></textarea>
+  </div>
+</section>
+
+<footer>
+  Ca' di Bazzone · sorgente <code>point_cloud.ply</code>, 8.893.769 splat ·
+  scheda generata per la prova Gate 0.
+</footer>
+</div>
+
+<div class="bar">
+  <div class="inner">
+    <span class="prog">fatte <b id="cnt">0</b>/8</span>
+    <button class="act" id="build">Genera riepilogo</button>
+  </div>
+</div>
+
+<script>
+const BASE = "https://mf-atria.pages.dev/";
+// dpr drives pixel count; tier drives model detail. fresh=1 defeats the immutable cache
+// so the download timing describes the network and not the phone's disk.
+const RUNS = [
+  { id:"1", p:1, tier:"lod4", dpr:"1",    mb:13,  why:"Risoluzione più bassa. Dovrebbe essere la più fluida di tutte." },
+  { id:"2", p:1, tier:"lod4", dpr:"1.5",  mb:13,  why:"Via di mezzo. Probabilmente il miglior compromesso." },
+  { id:"3", p:1, tier:"lod4", dpr:"2",    mb:13,  why:"Risoluzione alta. Qui potrebbe iniziare a scattare." },
+  { id:"4", p:1, tier:"lod4", dpr:"auto", mb:13,  why:"Risoluzione piena dello schermo. Ci aspettiamo che vada male." },
+  { id:"5", p:2, tier:"lod5", dpr:"1",    mb:7,   why:"Modello più leggero. Controprova: se non migliora, il dettaglio non c'entra." },
+  { id:"6", p:2, tier:"lod3", dpr:"1",    mb:27,  why:"Dettaglio doppio rispetto alla fase 1. Guarda se è più nitido." },
+  { id:"7", p:2, tier:"lod2", dpr:"1",    mb:53,  why:"Il più nitido che possiamo permetterci come peso. Occhio al tempo di scaricamento." },
+  { id:"8", p:3, tier:"lod0", dpr:"1",    mb:214, why:"Qualità massima assoluta, per vedere cosa ci stiamo perdendo.", wifi:true },
+];
+const CELLS = [
+  ["fps",   "fps min / avg",      "es. 28 / 45"],
+  ["under", "frames under 30",    "es. 120"],
+  ["first", "first splats drawn", "es. 2.4 s"],
+  ["dl",    "splat download",     "es. 6.1 s"],
+  ["built", "splats built",       "es. 100%"],
+  ["sharp", "Nitidezza 1-5",      "1 = pessima"],
+];
+const KEY = "atria-scheda-bazzone";
+const state = JSON.parse(localStorage.getItem(KEY) || "{}");
+
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+for (const r of RUNS) {
+  const li = document.createElement("li");
+  li.className = "run card" + (r.wifi ? " warn" : "");
+  const url = `${BASE}?tier=${r.tier}&dpr=${r.dpr}&fresh=1`;
+  li.innerHTML =
+    `<div class="idx">${r.id}</div><div class="body">
+      <div class="spec">
+        <span class="chip hi">${r.tier}</span>
+        <span class="chip">risoluzione ${r.dpr === "auto" ? "piena" : r.dpr + "×"}</span>
+        <span class="chip${r.wifi ? " wa" : ""}">${r.mb} MB</span>
+        ${r.wifi ? '<span class="chip wa">solo wi-fi</span>' : ""}
+      </div>
+      <p class="why">${esc(r.why)}</p>
+      <a class="go" href="${url}" target="_blank" rel="noopener">Apri prova ${r.id}</a>
+      <div class="grid">${CELLS.map(([k, lab, ph]) =>
+        `<label class="field"><span class="lbl">${esc(lab)}</span>
+          <input data-k="${r.id}_${k}" placeholder="${esc(ph)}"></label>`).join("")}
+      </div>
+      <label class="done"><input type="checkbox" data-k="${r.id}_ok"> Prova completata</label>
+    </div>`;
+  document.getElementById("phase" + r.p).appendChild(li);
+}
+
+const today = new Date();
+document.getElementById("today").textContent =
+  "DATA: " + today.toLocaleDateString("it-IT", { day:"2-digit", month:"2-digit", year:"numeric" });
+
+const fields = () => document.querySelectorAll("[data-k], #m_dev, #m_os, #m_net, #m_sig, #m_notes");
+function restore() {
+  for (const el of fields()) {
+    const k = el.dataset.k || el.id;
+    if (state[k] === undefined) continue;
+    if (el.type === "checkbox") el.checked = state[k]; else el.value = state[k];
+  }
+  count();
+}
+function count() {
+  const n = RUNS.filter(r => state[r.id + "_ok"]).length;
+  document.getElementById("cnt").textContent = n;
+}
+// The test opens in another tab and phones drop background tabs, so persist on every keystroke.
+document.addEventListener("input", (e) => {
+  const el = e.target, k = el.dataset.k || el.id;
+  if (!k) return;
+  state[k] = el.type === "checkbox" ? el.checked : el.value;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {}
+  count();
+});
+document.addEventListener("change", (e) => {
+  if (e.target.type === "checkbox") {
+    state[e.target.dataset.k] = e.target.checked;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {}
+    count();
+  }
+});
+
+document.getElementById("build").addEventListener("click", () => {
+  const v = (k) => (state[k] || "-");
+  const L = [];
+  L.push("SCHEDA CAMPO - CA' DI BAZZONE");
+  L.push("Telefono : " + v("m_dev") + "  /  Android " + v("m_os"));
+  L.push("Rete     : " + v("m_net") + "  /  segnale " + v("m_sig"));
+  L.push("Data     : " + today.toLocaleDateString("it-IT"));
+  L.push("");
+  L.push("n  tier  dpr   fps min/avg   <30      1o frame   download   built    nitid.");
+  L.push("-".repeat(78));
+  for (const r of RUNS) {
+    L.push([
+      r.id.padEnd(2), r.tier.padEnd(5), String(r.dpr).padEnd(5),
+      v(r.id + "_fps").padEnd(13), v(r.id + "_under").padEnd(8),
+      v(r.id + "_first").padEnd(10), v(r.id + "_dl").padEnd(10),
+      v(r.id + "_built").padEnd(8), v(r.id + "_sharp"),
+    ].join(" "));
+  }
+  L.push("");
+  L.push("NOTE: " + v("m_notes"));
+  const txt = L.join("\n");
+  const out = document.getElementById("out");
+  out.value = txt;
+  out.scrollIntoView({ behavior: "smooth", block: "center" });
+  out.focus(); out.select();
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(() => {});
+});
+
+restore();
+</script>

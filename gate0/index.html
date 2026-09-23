@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>mf-atria — Gate 0</title>
+<style>
+  html,body{margin:0;height:100%;background:#111;color:#eee;
+    font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:hidden}
+  #hud{position:fixed;top:0;left:0;right:0;z-index:10;padding:10px 12px;
+    background:rgba(0,0,0,.78);backdrop-filter:blur(6px);font-size:13px;
+    padding-top:calc(10px + env(safe-area-inset-top))}
+  #hud b{color:#7ee787;font-weight:600}
+  .bad{color:#ff7b72!important}
+  .warn{color:#ffa657!important}
+  #hint{color:#484f58;font-size:11px;margin-top:6px}
+  #hud.min #rows,#hud.min #hint{display:none}
+  #hud.min::after{content:'tap for stats';color:#8b949e;font-size:12px}
+  #rows{display:grid;grid-template-columns:auto 1fr;gap:1px 10px}
+  #rows span:nth-child(odd){color:#8b949e}
+  #bar{position:fixed;bottom:0;left:0;right:0;z-index:10;
+    padding-bottom:env(safe-area-inset-bottom)}
+  #tiers .subj{display:flex;align-items:stretch}
+  #tiers .sl{flex:0 0 96px;display:flex;align-items:center;padding:0 8px;background:#161b22;
+    color:#8b949e;font-size:10px;line-height:1.2;border-top:1px solid #30363d}
+  #ctl{display:flex}
+  #bar a{flex:1;text-align:center;padding:9px 2px;background:#21262d;color:#eee;
+    text-decoration:none;border-top:1px solid #30363d;font-size:12px;line-height:1.3}
+  #bar a.on{background:#1f6feb}
+  #bar a.over{background:#3d2113;color:#ffa657}
+  #bar a.over.on{background:#9e3f1a;color:#fff}
+  #bar a small{display:block;font-size:10px;opacity:.75}
+  #err{position:fixed;inset:0;z-index:20;display:none;place-content:center;
+    padding:24px;background:#111;text-align:center}
+</style>
+</head>
+<body>
+<div id="hud"><div id="rows"></div><div id="hint">tap to collapse</div></div>
+<div id="bar">
+  <div id="tiers"></div>
+  <div id="ctl">
+    <a href="#" id="frame">frame</a>
+    <a href="#" id="prog">prog: ?</a>
+    <a href="#" id="dpr">dpr: ?</a>
+    <a href="#" id="fresh">fresh</a>
+    <a href="#" id="gpusort">gpu: ?</a>
+  </div>
+</div>
+<div id="err"><div><h2>Load failed</h2><pre id="errmsg"></pre></div></div>
+
+<script>
+// Classic (non-module) guard. A module script that fails to LOAD cannot report its
+// own failure -- that is how this page rendered nothing at all. VW-06: fail loudly,
+// never a blank canvas.
+(function () {
+  var shown = false;
+  window.__atriaFail = function (msg) {
+    if (shown) return; shown = true;
+    document.getElementById('errmsg').textContent = msg;
+    document.getElementById('err').style.display = 'grid';
+  };
+  // capture phase: resource load errors do not bubble
+  window.addEventListener('error', function (ev) {
+    window.__atriaFail((ev.message || 'Load error') + (ev.filename ? '\n' + ev.filename : ''));
+  }, true);
+  window.addEventListener('unhandledrejection', function (ev) {
+    var r = ev.reason;
+    window.__atriaFail('Unhandled rejection: ' + ((r && (r.stack || r.message)) || r));
+  });
+  setTimeout(function () {
+    if (!window.__atriaBooted) {
+      window.__atriaFail('Module never booted after 8 s.\nLikely a failed import - check every file under /lib/ exists and is served as application/javascript.');
+    }
+  }, 8000);
+})();
+</script>
+<script type="importmap">
+{"imports":{"three":"./lib/three.module.min.js"}}
+</script>
+<script type="module">
+window.__atriaBooted = true;
+import * as GS from './lib/gaussian-splats-3d.module.js';
+import * as THREE from 'three';
+
+// Two subjects. Bazzone: 531 m² site. Ufficio: 202 m² office -- the density comparison.
+const TIERS = {
+  lod0: { n: 8893769, bytes: 213878400, path: 'ca-di-bazzone/lod0' },
+  lod1: { n: 4437675, bytes: 106723440, path: 'ca-di-bazzone/lod1' },
+  lod2: { n: 2216199, bytes:  53303760, path: 'ca-di-bazzone/lod2' },
+  lod3: { n: 1106573, bytes:  26620560, path: 'ca-di-bazzone/lod3' },
+  lod4: { n:  552566, bytes:  13298192, path: 'ca-di-bazzone/lod4' },
+  lod5: { n:  275899, bytes:   6644860, path: 'ca-di-bazzone/lod5' },
+  'uff-lod1': { n: 1349593, bytes: 32500000, path: 'ufficio/uff-lod1', uff: 1 },
+  'uff-lod2': { n:  674394, bytes: 16200000, path: 'ufficio/uff-lod2', uff: 1 },
+  'uff-lod3': { n:  336928, bytes:  8100000, path: 'ufficio/uff-lod3', uff: 1 },
+};
+for (const v of Object.values(TIERS)) v.mb = v.bytes / 1e6;
+const TOTAL = Object.fromEntries(Object.entries(TIERS).map(([k, v]) => [k, v.n]));
+const P = new URLSearchParams(location.search);
+const tier = TIERS[P.get('tier')] ? P.get('tier') : 'lod4';
+const progressive = P.get('progressive') === '1';
+const nativeDpr = window.devicePixelRatio || 1;
+const DPRS = ['1', '1.5', '2', 'auto'];
+const dprMode = DPRS.includes(P.get('dpr')) ? P.get('dpr') : '1';
+const dprValue = dprMode === 'auto' ? nativeDpr : parseFloat(dprMode);
+// The library reads window.devicePixelRatio internally and threads it through the
+// SplatMesh viewport maths at construction, so spoofing it here is the only way to
+// get an arbitrary ratio -- ignoreDevicePixelRatio only gives you 1 or native.
+Object.defineProperty(window, 'devicePixelRatio', { get: () => dprValue, configurable: true });
+
+// Cache-buster. cache-control is immutable, so a repeat run is served from disk and
+// any byte/time measurement silently describes the cache, not the network.
+const fresh = P.get('fresh') === '1';
+const gpuSort = P.get('gpusort') === '1';
+
+
+const BASE = 'https://pub-cb2d839ee3ef4696836bdaa62ca1b371.r2.dev/tours';
+const SPLAT = `${BASE}/${TIERS[tier].path}.ksplat` + (fresh ? `?cb=${Date.now()}` : '');
+
+// Scene bounds measured from the vertex data, NOT the PLY header comments --
+// those min/max values are set by a few far outliers (drone/landscape floaters).
+// Real body of the scene, p1..p99: 18.9 x 28.1 x 7.8, diagonal 34.8.
+// z has the smallest extent -> z is up.
+const CENTER = [-4.29, -3.24, -0.28];
+const up   = (P.get('up')   || '0,0,1').split(',').map(Number);
+const look = (P.get('look') || CENTER.join(',')).split(',').map(Number);
+const pos  = (P.get('pos')  || `${CENTER[0]},${CENTER[1] - 38},${CENTER[2] + 8}`).split(',').map(Number);
+
+const t0 = performance.now();
+const splatBytes = TIERS[tier].bytes;
+let loaded = false;
+let splatsLoaded = 0;
+let ttff = null, firstRender = null, firstProgress = null, frames = 0, fpsNow = 0, fpsMin = Infinity;
+let under30 = 0, lastT = performance.now(), acc = 0, accN = 0;
+const win = [];
+
+const rows = document.getElementById('rows');
+document.getElementById('hud').onclick = (e) => e.currentTarget.classList.toggle('min');
+const sab = typeof SharedArrayBuffer !== 'undefined';
+function paint() {
+  // Cross-origin entries report transferSize 0 (R2 sends no Timing-Allow-Origin),
+  // so: same-origin bytes from resource timing, plus the splat from Content-Length.
+  const xfer = performance.getEntriesByType('resource')
+                 .reduce((s,e) => s + (e.transferSize || 0), 0) + (splatBytes || 0);
+  const mb = n => (n/1e6).toFixed(1) + ' MB';
+  const r = [
+    ['tier', `<b>${tier}</b>`],
+    ['crossOriginIsolated', `<b class="${crossOriginIsolated ? 'bad' : ''}">${crossOriginIsolated}</b>`],
+    ['SharedArrayBuffer', `<b class="${sab ? 'warn' : ''}">${sab ? 'available' : 'absent'}</b>`],
+    ['splat bytes', `<b>${splatBytes ? mb(splatBytes) : '…'}</b>`],
+    ['page transferred', `<b class="${xfer > 60e6 ? 'bad' : ''}">${mb(xfer)}</b> / 60 MB${xfer > 60e6 ? ' <b class="bad">OVER</b>' : ''}`],
+    ['first splats drawn', `<b class="${firstRender && firstRender > 5000 ? 'bad' : ''}">${firstRender ? (firstRender/1000).toFixed(2)+' s' : '…'}</b> / 5 s`],
+    ['splat download', `<b>${(() => {
+        const e = performance.getEntriesByType('resource').find(r => r.name === SPLAT);
+        if (!e) return '…';
+        const d = e.duration;
+        return d < 60 ? d.toFixed(0) + ' ms (CACHED)' : (d/1000).toFixed(2) + ' s';
+      })()}</b>`],
+    ['cache', `<b class="${fresh ? '' : 'warn'}">${fresh ? 'busted (real network)' : 'allowed - may be cached'}</b>`],
+    ['fps now', `<b class="${fpsNow && fpsNow < 30 ? 'bad' : ''}">${fpsNow ? fpsNow.toFixed(0) : '…'}</b>`],
+    ['fps min / avg', `<b class="${fpsMin < 30 ? 'bad' : ''}">${fpsMin === Infinity ? '…' : fpsMin.toFixed(0)}</b> / <b>${accN ? (acc/accN).toFixed(0) : '…'}</b>`],
+    ['frames under 30', `<b class="${under30 ? 'warn' : ''}">${under30}</b>`],
+    ['elapsed', `<b>${((performance.now()-t0)/1000).toFixed(0)} s</b>`],
+    ['splats built', `<b>${splatsLoaded.toLocaleString()}</b> / ${TOTAL[tier].toLocaleString()} <b class="${splatsLoaded >= TOTAL[tier] ? '' : 'warn'}">(${(100*splatsLoaded/TOTAL[tier]).toFixed(0)}%)</b>`],
+    ['progressive load', `<b>${progressive ? 'on' : 'off'}</b>`],
+    ['gpu sort', `<b class="${gpuSort ? '' : 'warn'}">${gpuSort ? 'on' : 'off'}</b>`],
+    ['devicePixelRatio', `<b>${dprValue.toFixed(2)}</b> (native ${nativeDpr.toFixed(2)})`],
+    ['splats per m²', `<b>${Math.round(TIERS[tier].n / (TIERS[tier].uff ? 202 : 531)).toLocaleString()}</b> (sharp \u2248 16,700)`],
+    ['render pixels', `<b>${((innerWidth * dprValue * innerHeight * dprValue) / 1e6).toFixed(2)} MP</b>`],
+    ['state', `<b>${loaded ? 'loaded - fps below is sustained' : 'streaming…'}</b>`],
+  ];
+  rows.innerHTML = r.map(([k,v]) => `<span>${k}</span><span>${v}</span>`).join('');
+}
+setInterval(paint, 500); paint();
+
+function tick(t) {
+  const dt = t - lastT; lastT = t;
+  if (dt > 0 && dt < 2000) {
+    win.push(1000/dt); if (win.length > 30) win.shift();
+    fpsNow = win.reduce((a,b)=>a+b,0)/win.length;
+    // ignore the first 2 s (load spike) for min/avg
+    if (performance.now() - t0 > 2000 && ttff) {
+      if (fpsNow < fpsMin) fpsMin = fpsNow;
+      acc += fpsNow; accN++;
+      if (1000/dt < 30) under30++;
+    }
+  }
+  if (ttff === null && firstProgress !== null) { ttff = performance.now() - t0; }
+  // first frame actually containing splats -- the number NF-02 is really about
+  if (firstRender === null && viewer && viewer.splatMesh && viewer.splatMesh.getSplatCount() > 0) {
+    firstRender = performance.now() - t0;
+  }
+  frames++;
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+function sceneBounds() {
+  const m = viewer && viewer.splatMesh; if (!m) return null;
+  const n = m.getSplatCount(); if (!n) return null;
+  const tmp = new THREE.Vector3();
+  const step = Math.max(1, Math.floor(n / 20000));   // sample, don't scan millions
+  const xs = [], ys = [], zs = [];
+  for (let i = 0; i < n; i += step) { m.getSplatCenter(i, tmp, false); xs.push(tmp.x); ys.push(tmp.y); zs.push(tmp.z); }
+  // p10..p90, NOT min/max: stray splats (drone floaters, distant landscape) blow the
+  // bounding box out several-fold and frame the camera on empty space. Even p2/p98 left
+  // the subject at ~25% of frame; the dense core is what you actually want to look at.
+  const asc = (a, b) => a - b;
+  xs.sort(asc); ys.sort(asc); zs.sort(asc);
+  const q = (a, p) => a[Math.min(a.length - 1, Math.floor(a.length * p))];
+  return {
+    n,
+    mn: new THREE.Vector3(q(xs, 0.10), q(ys, 0.10), q(zs, 0.10)),
+    mx: new THREE.Vector3(q(xs, 0.90), q(ys, 0.90), q(zs, 0.90)),
+  };
+}
+function frameScene() {
+  const b = sceneBounds(); if (!b) return;
+  const c = b.mn.clone().add(b.mx).multiplyScalar(0.5);
+  const radius = Math.max(b.mx.distanceTo(b.mn) / 2, 0.5);
+  const fov = viewer.camera.fov * Math.PI / 180;
+  const dist = radius / Math.sin(fov / 2) * 1.10;
+  const dir = new THREE.Vector3(0, -1, 0.28).normalize();   // slight elevation
+  viewer.camera.position.copy(c).add(dir.multiplyScalar(dist));
+  viewer.camera.near = dist / 100; viewer.camera.far = dist * 20;
+  viewer.camera.updateProjectionMatrix();
+  if (viewer.controls) { viewer.controls.target.copy(c); viewer.controls.update(); }
+}
+window.__frame = frameScene;
+const flags = (o = {}) => {
+  const q = new URLSearchParams();
+  q.set('tier', o.tier || tier);
+  if ((o.progressive ?? progressive)) q.set('progressive', '1');
+  const d = o.dpr || dprMode; if (d !== '1') q.set('dpr', d);
+  if (o.fresh ?? fresh) q.set('fresh', '1');
+  if (o.gpuSort ?? gpuSort) q.set('gpusort', '1');
+  return '?' + q;
+};
+const row = (uff) => Object.entries(TIERS).filter(([, v]) => !!v.uff === uff).map(([t, v]) => {
+  const over = v.mb + 0.23 > 60;   // NF-01 is 60 MB
+  return `<a href="${flags({ tier: t })}" class="${t === tier ? 'on ' : ''}${over ? 'over' : ''}">` +
+         `${t.replace('uff-','')}<small>${Math.round(v.mb)} MB</small></a>`;
+}).join('');
+document.getElementById('tiers').innerHTML =
+  `<div class="subj"><span class="sl">Bazzone 531 m²</span>${row(false)}</div>` +
+  `<div class="subj"><span class="sl">Ufficio 202 m²</span>${row(true)}</div>`;
+const pb = document.getElementById('prog');
+if (pb) { pb.textContent = 'prog: ' + (progressive ? 'on' : 'off');
+          pb.href = flags({ progressive: !progressive }); }
+const db = document.getElementById('dpr');
+if (db) { db.textContent = 'dpr: ' + dprMode;
+          db.href = flags({ dpr: DPRS[(DPRS.indexOf(dprMode) + 1) % DPRS.length] }); }
+const gb = document.getElementById('gpusort');
+if (gb) { gb.textContent = 'gpu: ' + (gpuSort ? 'on' : 'off'); gb.href = flags({ gpuSort: !gpuSort }); }
+const xb = document.getElementById('fresh');
+if (xb) { xb.textContent = fresh ? 'fresh: on' : 'fresh: off'; xb.href = flags({ fresh: !fresh }); }
+const fb = document.getElementById('frame');
+if (fb) fb.onclick = (e) => { e.preventDefault(); frameScene(); };
+
+function fail(e) {
+  window.__atriaFail((e && (e.stack || e.message)) || String(e));
+  console.error(e);
+}
+
+const viewer = new GS.Viewer({
+  cameraUp: up,
+  initialCameraPosition: pos,
+  initialCameraLookAt: look,
+  sharedMemoryForWorkers: false,   // C1: the path under test
+  dynamicScene: false,
+  ignoreDevicePixelRatio: false,
+  gpuAcceleratedSort: gpuSort,
+  halfPrecisionCovariancesOnGPU: true,
+  useBuiltInControls: true,
+  logLevel: GS.LogLevel.None,
+});
+
+viewer.addSplatScene(SPLAT, {
+  format: GS.SceneFormat.KSplat,   // required: ?cb= breaks extension sniffing
+  progressiveLoad: progressive,
+  showLoadingUI: false,
+  onProgress: (pct) => { if (firstProgress === null && pct > 0) firstProgress = performance.now(); },
+})
+.then(() => {
+  viewer.start();
+  window.__v = viewer;
+  // NF-03 measures SUSTAINED fps -- discard the progressive-load stutters
+  setTimeout(() => { fpsMin = Infinity; acc = 0; accN = 0; under30 = 0; loaded = true; }, 500);
+  // re-frame while the scene streams in; the bounds grow as sections arrive
+  let stable = 0, userMoved = false;
+  if (viewer.controls) viewer.controls.addEventListener('start', () => { userMoved = true; });
+  const reframe = setInterval(() => {
+    if (userMoved) { clearInterval(reframe); return; }
+    const b = sceneBounds(); if (!b) return;
+    if (b.n === splatsLoaded) { if (++stable > 3) clearInterval(reframe); return; }
+    splatsLoaded = b.n; stable = 0; frameScene();
+  }, 1500);
+})
+.catch(fail);
+</script>
+</body>
+</html>

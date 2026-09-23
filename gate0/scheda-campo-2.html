@@ -1,0 +1,352 @@
+<title>Secondo Giro Ca' di Bazzone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground:  #EDF0EC;
+    --surface: #FFFFFF;
+    --sunk:    #E3E8E2;
+    --line:    #CFD7CD;
+    --line-2:  #B4BFB2;
+    --ink:     #171B17;
+    --muted:   #5E6A5D;
+    --accent:  #0F766E;
+    --accent-ink: #FFFFFF;
+    --warn:    #9A5B06;
+    --warn-bg: #FBF0DC;
+    --ok:      #15803D;
+    --shadow:  0 1px 2px rgba(23,27,23,.06), 0 4px 14px rgba(23,27,23,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:  #12161A;
+      --surface: #1A2026;
+      --sunk:    #232B32;
+      --line:    #2E3841;
+      --line-2:  #43505B;
+      --ink:     #E4EAE6;
+      --muted:   #94A39A;
+      --accent:  #2DD4BF;
+      --accent-ink: #06231F;
+      --warn:    #F0B429;
+      --warn-bg: #33280F;
+      --ok:      #4ADE80;
+      --shadow:  0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:  #12161A;
+    --surface: #1A2026;
+    --sunk:    #232B32;
+    --line:    #2E3841;
+    --line-2:  #43505B;
+    --ink:     #E4EAE6;
+    --muted:   #94A39A;
+    --accent:  #2DD4BF;
+    --accent-ink: #06231F;
+    --warn:    #F0B429;
+    --warn-bg: #33280F;
+    --ok:      #4ADE80;
+    --shadow:  0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 16px; line-height: 1.55;
+    margin: 0; padding: 0 16px 140px;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  h1, h2, h3, .lbl { font-family: "IBM Plex Sans Condensed", "IBM Plex Sans", sans-serif; }
+  h1 { font-size: clamp(28px, 7vw, 40px); font-weight: 700; letter-spacing: -.015em;
+       margin: 0; text-wrap: balance; line-height: 1.1; }
+  h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+       color: var(--accent); margin: 0 0 4px; }
+  .lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .09em;
+         color: var(--muted); }
+  p { margin: 0; }
+  code, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  header { padding: 32px 0 20px; border-bottom: 2px solid var(--line-2); }
+  .sub { color: var(--muted); margin-top: 8px; font-size: 15px; }
+  .rule { display: flex; gap: 10px; align-items: baseline; margin-top: 14px;
+          font-size: 12px; color: var(--muted); }
+
+  section { margin-top: 30px; }
+  .card { background: var(--surface); border: 1px solid var(--line);
+          border-radius: 3px; box-shadow: var(--shadow); }
+
+  /* ---- intake ---- */
+  .intake { padding: 16px; display: grid; gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  input, select, textarea {
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 15px;
+    background: var(--sunk); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 2px;
+    padding: 9px 10px; width: 100%; font-variant-numeric: tabular-nums;
+  }
+  input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
+  /* ---- steps ---- */
+  ol.runs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+  .run { display: grid; grid-template-columns: 44px 1fr; }
+  .idx { background: var(--sunk); border-right: 1px solid var(--line);
+         display: flex; align-items: flex-start; justify-content: center; padding-top: 15px;
+         font-family: "IBM Plex Mono", monospace; font-size: 15px; font-weight: 600;
+         color: var(--muted); border-radius: 3px 0 0 3px; }
+  .run.warn .idx { background: var(--warn-bg); color: var(--warn); }
+  .body { padding: 14px 15px 15px; min-width: 0; }
+  .spec { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 4px; }
+  .chip { font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 500;
+          padding: 2px 7px; border-radius: 2px; background: var(--sunk);
+          border: 1px solid var(--line); color: var(--ink); }
+  .chip.hi { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .chip.wa { background: var(--warn-bg); color: var(--warn); border-color: var(--warn); }
+  .why { font-size: 14px; color: var(--muted); margin: 2px 0 12px; }
+
+  a.go { display: block; text-align: center; text-decoration: none;
+         background: var(--accent); color: var(--accent-ink);
+         font-family: "IBM Plex Sans Condensed", sans-serif; font-weight: 600;
+         font-size: 16px; letter-spacing: .04em; text-transform: uppercase;
+         padding: 13px; border-radius: 2px; margin-bottom: 14px; }
+  a.go:active { opacity: .8; }
+
+  .grid { display: grid; gap: 9px; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); }
+  .done { display: flex; align-items: center; gap: 8px; margin-top: 12px;
+          font-size: 14px; color: var(--muted); cursor: pointer; }
+  .done input { width: 18px; height: 18px; accent-color: var(--accent); padding: 0; }
+
+  /* ---- steps list ---- */
+  .how { padding: 15px 17px; }
+  .how ol { margin: 8px 0 0; padding-left: 20px; }
+  .how li { margin-bottom: 7px; font-size: 15px; }
+  .how li:last-child { margin-bottom: 0; }
+  .how b { color: var(--accent); }
+
+  .note { border-left: 3px solid var(--warn); background: var(--warn-bg);
+          padding: 12px 14px; border-radius: 0 2px 2px 0; font-size: 14.5px; color: var(--ink); }
+  .note .lbl { color: var(--warn); display: block; margin-bottom: 3px; }
+
+  /* ---- export ---- */
+  #out { width: 100%; min-height: 190px; margin-top: 12px; font-size: 13px; line-height: 1.5; white-space: pre; }
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+         background: var(--surface); border-top: 1px solid var(--line-2);
+         padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+         box-shadow: 0 -4px 18px rgba(0,0,0,.08); }
+  .bar .inner { max-width: 720px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
+  .prog { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .prog b { color: var(--ink); font-family: "IBM Plex Mono", monospace; }
+  button.act { flex: 1; background: var(--accent); color: var(--accent-ink); border: 0;
+    font-family: "IBM Plex Sans Condensed", sans-serif; font-weight: 600; font-size: 15px;
+    text-transform: uppercase; letter-spacing: .04em; padding: 12px; border-radius: 2px; cursor: pointer; }
+  footer { margin-top: 28px; font-size: 13px; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+<header>
+  <h2>Rilievo 3DGS · secondo giro</h2>
+  <h1>Scheda Campo Ca' di Bazzone</h1>
+  <p class="sub">Grazie del primo giro: i dati erano ottimi e hanno chiuso quasi tutte le domande. Resta <b>una sola prova</b>, cinque minuti. <b>Non toccare il tasto <code>gpu</code></b>: deve restare su <code>off</code>.</p>
+  <div class="rule mono"><span>OPERATORE: Davide</span><span>·</span><span id="today"></span></div>
+</header>
+
+<section>
+  <h2>Cosa abbiamo scoperto</h2>
+  <div class="card how">
+    <ol style="list-style:none;padding-left:0">
+      <li>Abbassare la risoluzione funziona: a <code>dpr 1.5</code> il tour gira a <b>36/46 fps</b>, fluido.</li>
+      <li>Il livello che si vede meglio (<code>lod2</code>) resta troppo pesante: 11 fps, inusabile.</li>
+      <li>Avevo pensato a un'opzione (<b>gpu sort</b>) per risolvere: <b>è difettosa nella libreria</b>
+          e fa vedere solo schermo nero, sia su telefono che su PC. Se hai già provato quei link,
+          era colpa mia, non tua — scartali. <b>In questa prova deve restare spenta.</b></li>
+    </ol>
+    <div class="note" style="margin-top:14px">
+      <span class="lbl">Cosa manca davvero</span>
+      Un solo numero: <b>quanto tempo aspetta un cliente in 4G</b>. Le tue prove erano tutte in 5G,
+      che è molto più veloce della media. È l'ultimo dato che ci serve per decidere.
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Come si fa</h2>
+  <div class="card how">
+    <ol>
+      <li>Prima <b>forza il telefono in 4G</b> come spiegato nel riquadro giallo qui sotto.</li>
+      <li><b>Controlla che in basso a destra ci sia scritto <code>gpu: off</code>.</b>
+          Se per qualsiasi motivo dice <code>gpu: on</code>, toccalo una volta per spegnerlo:
+          con quella impostazione accesa <b>si vede solo schermo nero</b>.</li>
+      <li>Aspetta <code>splats built</code> a <b>100%</b>, poi <b>ruota col dito per un minuto</b>.</li>
+      <li>Il numero che conta di più è <b>first splats drawn</b>: quanto ci mette a comparire la scena.</li>
+      <li>Accanto a ogni casella trovi il risultato della volta scorsa: serve solo per confronto.</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <h2>Telefono e collegamento</h2>
+  <div class="card intake">
+    <label class="field"><span class="lbl">Modello telefono</span><input id="m_dev" placeholder="Realme GT Master Edition"></label>
+    <label class="field"><span class="lbl">Versione Android</span><input id="m_os" placeholder="13"></label>
+    <label class="field"><span class="lbl">Operatore / rete</span><input id="m_net" placeholder="Very 5G"></label>
+    <label class="field"><span class="lbl">Tacche di segnale</span><input id="m_sig" placeholder="es. 4 su 5"></label>
+  </div>
+</section>
+
+<section>
+  <h2>La prova</h2>
+  <ol class="runs" id="phase1"></ol>
+</section>
+
+<section>
+  <h2>Note libere</h2>
+  <div class="card" style="padding:14px">
+    <textarea id="m_notes" rows="4" placeholder="Si vede meglio o uguale? Scatta? Il telefono si scalda? Qualsiasi cosa strana."></textarea>
+  </div>
+</section>
+
+<section>
+  <h2>Invia i risultati</h2>
+  <div class="card" style="padding:14px">
+    <p style="font-size:14.5px;color:var(--muted);margin-bottom:2px">
+      Premi il pulsante in basso, poi copia tutto il testo e mandalo a Mattia.</p>
+    <textarea id="out" class="mono" readonly placeholder="Il riepilogo comparirà qui."></textarea>
+  </div>
+</section>
+
+<footer>
+  Ca' di Bazzone · secondo giro · unica differenza rispetto alla volta scorsa:
+  il telefono forzato in 4G invece che 5G.
+</footer>
+</div>
+
+<div class="bar">
+  <div class="inner">
+    <span class="prog">fatte <b id="cnt">0</b>/1</span>
+    <button class="act" id="build">Genera riepilogo</button>
+  </div>
+</div>
+
+<script>
+const BASE = "https://mf-atria.pages.dev/";
+// dpr drives pixel count; tier drives model detail. fresh=1 defeats the immutable cache
+// so the download timing describes the network and not the phone's disk.
+const RUNS = [
+  { id:"1", p:1, tier:"lod4", dpr:"1.5", mb:13, was:"su 5G: 2,41 s · 36/46 fps", forceLte:true,
+    why:"Stessa identica prova che avevi già fatto, ma col telefono forzato in 4G. Serve a sapere quanto aspetta davvero un cliente che non ha il 5G: è l'ultimo numero che ci manca." },
+];
+const CELLS = [
+  ["fps",   "fps min / avg",      "es. 28 / 45"],
+  ["under", "frames under 30",    "es. 120"],
+  ["first", "first splats drawn", "es. 2.4 s"],
+  ["built", "splats built",       "es. 100%"],
+  ["sharp", "Nitidezza 1-5",      "1 = pessima"],
+];
+const KEY = "atria-scheda-bazzone-r2b";
+const state = JSON.parse(localStorage.getItem(KEY) || "{}");
+
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+for (const r of RUNS) {
+  const li = document.createElement("li");
+  li.className = "run card" + (r.forceLte ? " warn" : "");
+  const url = `${BASE}?tier=${r.tier}&dpr=${r.dpr}&fresh=1`;
+  li.innerHTML =
+    `<div class="idx">${r.id}</div><div class="body">
+      <div class="spec">
+        <span class="chip hi">${r.tier}</span>
+        <span class="chip">risoluzione ${r.dpr === "auto" ? "piena" : r.dpr + "×"}</span>
+        <span class="chip${r.wifi ? " wa" : ""}">${r.mb} MB</span>
+        ${r.forceLte ? '<span class="chip wa">forza 4G</span>' : ""}
+      </div>
+      <p class="why">${esc(r.why)}</p>
+      <p class="why" style="margin-top:-8px"><b>La volta scorsa: ${esc(r.was)}</b></p>
+      <div class="note" style="margin-bottom:12px"><span class="lbl">Controlla prima di leggere i numeri</span>
+        In basso a destra deve esserci <b>gpu: off</b>. Se dice <b>on</b>, toccalo: con quella
+        accesa lo schermo resta nero ed è un difetto noto, non un problema del tuo telefono.</div>
+      ${r.forceLte ? '<div class="note" style="margin-bottom:12px"><span class="lbl">Prima di questa prova</span>' +
+        'Impostazioni &rsaquo; Rete mobile &rsaquo; Tipo di rete preferito &rsaquo; scegli <b>LTE / 4G</b> (togli il 5G). ' +
+        'Alla fine rimettilo come prima. Qui conta soprattutto <b>first splats drawn</b>.</div>' : ""}
+      <a class="go" href="${url}" target="_blank" rel="noopener">Apri prova ${r.id}</a>
+      <div class="grid">${CELLS.map(([k, lab, ph]) =>
+        `<label class="field"><span class="lbl">${esc(lab)}</span>
+          <input data-k="${r.id}_${k}" placeholder="${esc(ph)}"></label>`).join("")}
+      </div>
+      <label class="done"><input type="checkbox" data-k="${r.id}_ok"> Prova completata</label>
+    </div>`;
+  document.getElementById("phase" + r.p).appendChild(li);
+}
+
+const today = new Date();
+document.getElementById("today").textContent =
+  "DATA: " + today.toLocaleDateString("it-IT", { day:"2-digit", month:"2-digit", year:"numeric" });
+
+const fields = () => document.querySelectorAll("[data-k], #m_dev, #m_os, #m_net, #m_sig, #m_notes");
+function restore() {
+  for (const el of fields()) {
+    const k = el.dataset.k || el.id;
+    if (state[k] === undefined) continue;
+    if (el.type === "checkbox") el.checked = state[k]; else el.value = state[k];
+  }
+  count();
+}
+function count() {
+  const n = RUNS.filter(r => state[r.id + "_ok"]).length;
+  document.getElementById("cnt").textContent = n;
+}
+// The test opens in another tab and phones drop background tabs, so persist on every keystroke.
+document.addEventListener("input", (e) => {
+  const el = e.target, k = el.dataset.k || el.id;
+  if (!k) return;
+  state[k] = el.type === "checkbox" ? el.checked : el.value;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {}
+  count();
+});
+document.addEventListener("change", (e) => {
+  if (e.target.type === "checkbox") {
+    state[e.target.dataset.k] = e.target.checked;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {}
+    count();
+  }
+});
+
+document.getElementById("build").addEventListener("click", () => {
+  const v = (k) => (state[k] || "-");
+  const L = [];
+  L.push("SCHEDA CAMPO - CA' DI BAZZONE - GIRO 2 (prova 4G)");
+  L.push("Telefono : " + v("m_dev") + "  /  Android " + v("m_os"));
+  L.push("Rete     : " + v("m_net") + "  /  segnale " + v("m_sig"));
+  L.push("Data     : " + today.toLocaleDateString("it-IT"));
+  L.push("");
+  L.push("n  tier  dpr   fps min/avg   <30      1o frame   built    nitid.");
+  L.push("-".repeat(66));
+  for (const r of RUNS) {
+    L.push([
+      r.id.padEnd(2), r.tier.padEnd(5), String(r.dpr).padEnd(5),
+      v(r.id + "_fps").padEnd(13), v(r.id + "_under").padEnd(8),
+      v(r.id + "_first").padEnd(10),
+      v(r.id + "_built").padEnd(8), v(r.id + "_sharp"),
+    ].join(" "));
+  }
+  L.push("");
+  L.push("NOTE: " + v("m_notes"));
+  const txt = L.join("\n");
+  const out = document.getElementById("out");
+  out.value = txt;
+  out.scrollIntoView({ behavior: "smooth", block: "center" });
+  out.focus(); out.select();
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(() => {});
+});
+
+restore();
+</script>
